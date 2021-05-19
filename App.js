@@ -1,21 +1,44 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {SafeAreaView, StyleSheet, View, Text, Button } from 'react-native';
 
-export default function App() {
+import MenuScreen from './src/screens/MenuScreen';
+import Auth from './src/componentes/Auth';
+
+import firebase from './src/utils/firebase';
+import 'firebase/auth/';
+
+
+
+const App = () => {
+  const [user,setUser] = useState(undefined);
+
+  useEffect(()=>{
+    firebase.auth().onAuthStateChanged((response)=>{
+      setUser(response);
+    });
+  
+  },[]);
+
+  if(user === undefined) return null;
+  
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar barStyle = "light-content"/>
+      <SafeAreaView style={styles.background}>
+        {user ? <MenuScreen userId={user.uid}/>:<Auth/>}
+      </SafeAreaView>
+    </>
   );
+  
 }
 
+
 const styles = StyleSheet.create({
-  container: {
+  background:{
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  }
 });
+
+export default App;
