@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
+
 
 import { validateEmail } from '../utils/validation';
 import firebase from '../utils/firebase';
@@ -10,6 +11,34 @@ const RegisterScreen = (props) =>{
     const { changeForm } = props;
     const [formData, setFormData] = useState(defaultValue);
     const [formError, setFormError] = useState({});
+
+    async function registration(formData) {
+        try {
+          await firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password)
+          .then(() => {console.log("correo registrado");})
+          .catch(() => {
+                setFormError({
+                    email: true,
+                    password: true,
+                    confirmPass: true
+                });
+           });
+          const user = firebase.auth().currentUser;
+      
+          const db = firebase.firestore();
+          db.collection("users")
+            .doc(user.uid)
+            .set({
+                id: user.uid,
+                name: formData.name,
+                lastName: formData.lastName,
+                email: user.email,
+                userType: "user"
+            });
+        } catch (err) {
+          Alert.alert("There is something wrong!!!!", err.message);
+        }
+    }
 
 
     const register = () => {
@@ -32,30 +61,7 @@ const RegisterScreen = (props) =>{
             error.password = true;
         }
         else {
-            firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password)
-                .then(() => {
-                    console.log("cuenta creada");
-                    const user = firebase.auth().currentUser;
-                    console.log(user.uid);
-                    firebase.firestore().collection('users')
-                      .doc("user"+user.uid)
-                      .set({
-                            id: user.uid,
-                            name: formData.name,
-                            lastName: formData.lastName,
-                            email: formData.email,
-		                    userType: "user",
-                            dateTime: FieldValue.serverTimestamp()
-                        }).catch(error => {
-                            console.log(error);
-                        });    
-                }).catch(() => {
-                    setFormError({
-                        email: true,
-                        password: true,
-                        confirmPass: true
-                    });
-            });
+            registration(formData);
            
         }
         setFormError(error);
@@ -127,7 +133,7 @@ const styles = StyleSheet.create({
     },
     button : {
         height : 35,
-        width : 80,
+        width : 240,
         backgroundColor : 'red',
         marginTop : 30,
         borderRadius : 25,

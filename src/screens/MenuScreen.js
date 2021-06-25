@@ -1,25 +1,52 @@
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, TouchableOpacity, Text, Alert } from 'react-native';
 
 import firebase from '../utils/firebase';
 import 'firebase/auth/';
-import MessageListScreen from './MessageListScreen';
+import "firebase/firestore";
 
-const MenuScreen = (props) => {
-    var typeUser = 'admin';
+const db = firebase.firestore();
 
-    //const collectionReference = 
+const MenuScreen = ( { navigation } ) =>{
+    const [userType,setUserType] = useState(undefined);
+    const [user, setUser] = useState(undefined);
 
     const logout = ()=>{
         firebase.auth().signOut();
     }
 
+    useEffect(()=>{
+        getUserType();
+    },[]);
+
+    async function getUserType() {
+        try {
+            await firebase.auth().onAuthStateChanged((user)=>{
+                setUser(user.uid);
+                db.collection('users').doc(user.uid).get().then((doc)=>{
+                    console.log(doc.data().userType);
+                    setUserType(doc.data().userType);
+               });
+            });
+           
+        } catch (err) {
+          Alert.alert("There is something wrong!!!!", err.message);
+        }
+    }
+    
+
     return(
         <View style={styles.container}>
-            <Text>{props.userId}</Text>
+            <Text>{user}</Text>
+            <Text>{userType}</Text>
             <TouchableOpacity 
                 onPress={()=>{
-                
+                    if(userType == 'user'){
+                        console.log('hello');
+                        navigation.navigate('MessageScreen');
+                    } else if(userType == 'admin'){
+                        navigation.navigate('MessageListScreen');
+                    }
                 }} 
                 style={styles.button}
             >
@@ -28,7 +55,7 @@ const MenuScreen = (props) => {
     
             <TouchableOpacity 
                 onPress={()=>{
-                    
+                    navigation.navigate('HelpUsuario');
                 }} 
                 style={styles.button}
             >

@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     },
     button : {
         height : 50,
-        width : 160,
+        width : 240,
         backgroundColor : 'red',
         marginTop : 30,
         borderRadius : 25,

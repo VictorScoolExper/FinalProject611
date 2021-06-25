@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Touchable } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import CardListMessage from '../componentes/CardListMessage';
 
-const MessageListScreen = () => {
+const MessageListScreen = ( { navigation } ) => {
+
+    
     return(
         <View style={styles.container}>
             
